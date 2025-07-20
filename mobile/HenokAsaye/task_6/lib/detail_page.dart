@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
+
 
 class DetailPage extends StatelessWidget {
   const DetailPage({super.key});
@@ -73,7 +73,6 @@ class ProductInfo extends StatelessWidget{
             )
           )
         ],),
-
         Row(children: [
           Text("men's shoe",
           style:TextStyle(
@@ -97,52 +96,71 @@ class ProductInfo extends StatelessWidget{
     );
   }
 }
+class SizeRange extends StatefulWidget {
+  const SizeRange({super.key});
 
-class SizeRange extends StatelessWidget{
-   const SizeRange({super.key});
   @override
-   Widget build(BuildContext context){
-     final  sizes = ['39', '40', '41', '42', '43', '44'];
+  State<SizeRange> createState() => _SizeRangeState();
+}
+
+class _SizeRangeState extends State<SizeRange> {
+  String? selectedSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final sizes = ['39', '40', '41', '42', '43', '44'];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children:[
-        Text('Size'),
-        SizedBox(height:8),
-        SizedBox(
-          height:60,
-          child:GridView.count(
-            crossAxisCount: 3,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-            // physics: const NeverScrollableScrollPhysics(),
-            children:sizes.map((size) {
-              return OutlinedButton(
-                style:OutlinedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.grey[900],
-
-                  shape:RoundedRectangleBorder(
-                    borderRadius:BorderRadiusGeometry.circular(2)
-                  )
+      children: [
+        const Text('Size'),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: sizes.map((size) {
+              final isSelected = size == selectedSize;
+              return Padding(
+                padding: const EdgeInsets.all(4),
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    elevation: 2,
+                    backgroundColor: isSelected
+                        ? const Color.fromARGB(255, 45, 146, 230)
+                        : Colors.white,
+                    foregroundColor:
+                        isSelected ? Colors.white : Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    side: const BorderSide(color: Colors.transparent),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      selectedSize = size;
+                    });
+                  },
+                  child: Text(size),
                 ),
-                onPressed: (){},
-                child: Text(size)
               );
-            }
-            ).toList()
-          )
-        )
-      ]
+            }).toList(),
+          ),
+        ),
+      ],
     );
-   }
+  }
 }
 class ProductDescription extends StatelessWidget{
   const ProductDescription({super.key});
   @override
   Widget build(BuildContext context){
-    return Text(
-       'A derby leather shoe is a classic and versatile footwear option characterized by its open lacing system...',
-    );
+    return const Text(
+  'A derby leather shoe is a classic and versatile footwear option characterized by its open lacing system. '
+  'It offers a comfortable fit and a slightly more relaxed appearance than an Oxford shoe, making it suitable '
+  'for both formal and casual occasions. Crafted from high-quality leather, it ensures durability, style, and '
+  'long-lasting wear, making it an essential piece in any modern wardrobe.',
+);
+
   }
 }
 class ActionButtons extends StatelessWidget{
@@ -153,12 +171,22 @@ class ActionButtons extends StatelessWidget{
       children:[
         Expanded(
           child:OutlinedButton(
+          style:OutlinedButton.styleFrom(
+            shape:RoundedRectangleBorder(
+              borderRadius: BorderRadiusGeometry.circular(4)
+            )
+          ),
           onPressed: (){},
            child:const Text('Delete',style:TextStyle(color: Colors.red)))
         ),
         SizedBox(width:8),
         Expanded(
           child:OutlinedButton(
+          style:OutlinedButton.styleFrom(
+            shape:RoundedRectangleBorder(
+              borderRadius: BorderRadiusGeometry.circular(4)
+            )
+          ),
           onPressed: (){},
            child:const Text('Update',style:TextStyle(color:Colors.blue, ))
           )
