@@ -69,7 +69,7 @@ class ProductInfo extends StatelessWidget{
           Text("\$120",
             style:TextStyle(
               fontWeight: FontWeight.normal,
-              color:Colors.grey[100]
+              color:Colors.grey[500]
             )
           )
         ],),
@@ -77,14 +77,14 @@ class ProductInfo extends StatelessWidget{
           Text("men's shoe",
           style:TextStyle(
             fontWeight: FontWeight.normal,
-            color: Colors.grey[200],
+            color: Colors.grey[500],
             fontSize: 13
           )
           ),
           Spacer(),
           Row(
             children: [
-              Icon(Icons.start,color: Colors.amber,size:14),
+              Icon(Icons.star,color: Colors.amber,size:16),
               Text('(4.0)',style:TextStyle(
                 fontSize: 13,
                 color:Colors.grey
