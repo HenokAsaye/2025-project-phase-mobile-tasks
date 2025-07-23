@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:task_6/add_product_page.dart';
+import 'package:task_6/detail_page.dart';
 import 'home_page.dart';
 
 void main() {
@@ -7,6 +9,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -15,7 +18,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: HomePage(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => HomePage(),
+        '/add': (context) => const ProductFormPage(),
+        '/detail': (context) => const DetailPage(),
+      },
     );
   }
 }

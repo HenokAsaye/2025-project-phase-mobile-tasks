@@ -1,29 +1,35 @@
 import 'package:flutter/material.dart';
 
-
 class DetailPage extends StatelessWidget {
   const DetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final product = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              BackButton(),
-              SizedBox(height: 16),
-              ProductImage(),
-              SizedBox(height: 16),
-              ProductInfo(),
-              SizedBox(height: 16),
-              SizeRange(),
-              SizedBox(height: 16),
+            children: [
+              _BackButton(),
+              const SizedBox(height: 16),
+              ProductImage(imagePath: product['image']),
+              const SizedBox(height: 16),
+              ProductInfo(
+                name: product['name'],
+                price: product['price'],
+                category: product['category'],
+                rating: product['rating'],
+              ),
+              const SizedBox(height: 16),
+              const SizeRange(),
+              const SizedBox(height: 16),
               ProductDescription(),
-              SizedBox(height: 24),
-              ActionButtons(),
+              const SizedBox(height: 24),
+              const ActionButtons(),
             ],
           ),
         ),
@@ -32,70 +38,106 @@ class DetailPage extends StatelessWidget {
   }
 }
 
-class BackButton extends StatelessWidget{
-  const BackButton({super.key});
-  @override
-  Widget build(BuildContext context){
-    return Row(children: [
-      IconButton(onPressed: (){}, icon:Icon(Icons.arrow_back))
+class _BackButton extends StatelessWidget {
+  const _BackButton();
 
-    ],);
-  }
-}
-
-class ProductImage extends StatelessWidget{
-  const ProductImage({super.key});
   @override
-  Widget build(BuildContext context){
-    return ClipRect(
-        child:Image.asset('assets/Img/shoe.jpg')
-    );
-  }
-}
-class ProductInfo extends StatelessWidget{
-  const ProductInfo ({super.key});
-  @override
-  Widget build(BuildContext context){
-    return Column(
+  Widget build(BuildContext context) {
+    return Row(
       children: [
-        Row(children: [
-          Text('Derby Leather',
-          style:TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          )
-          ),
-          Spacer(),
-          Text("\$120",
-            style:TextStyle(
-              fontWeight: FontWeight.normal,
-              color:Colors.grey[500]
-            )
-          )
-        ],),
-        Row(children: [
-          Text("men's shoe",
-          style:TextStyle(
-            fontWeight: FontWeight.normal,
-            color: Colors.grey[500],
-            fontSize: 13
-          )
-          ),
-          Spacer(),
-          Row(
-            children: [
-              Icon(Icons.star,color: Colors.amber,size:16),
-              Text('(4.0)',style:TextStyle(
-                fontSize: 13,
-                color:Colors.grey
-              ))
-            ],
-          )
-        ],),
+        IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back),
+        ),
       ],
     );
   }
 }
+
+class ProductImage extends StatelessWidget {
+  final String imagePath;
+  const ProductImage({super.key, required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.asset(imagePath),
+    );
+  }
+}
+
+class ProductInfo extends StatelessWidget {
+  final String name;
+  final int price;
+  final String category;
+  final double rating;
+
+  const ProductInfo({
+    super.key,
+    required this.name,
+    required this.price,
+    required this.category,
+    required this.rating,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+            Text(
+              '\$$price',
+              style: TextStyle(
+                fontWeight: FontWeight.normal,
+                color: Colors.grey[500],
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Text(
+              category,
+              style: TextStyle(
+                fontWeight: FontWeight.normal,
+                color: Colors.grey[500],
+                fontSize: 13,
+              ),
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                const Icon(Icons.star, color: Colors.amber, size: 16),
+                Text(
+                  '($rating)',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 class SizeRange extends StatefulWidget {
   const SizeRange({super.key});
 
@@ -150,48 +192,56 @@ class _SizeRangeState extends State<SizeRange> {
     );
   }
 }
-class ProductDescription extends StatelessWidget{
-  const ProductDescription({super.key});
-  @override
-  Widget build(BuildContext context){
-    return const Text(
-  'A derby leather shoe is a classic and versatile footwear option characterized by its open lacing system. '
-  'It offers a comfortable fit and a slightly more relaxed appearance than an Oxford shoe, making it suitable '
-  'for both formal and casual occasions. Crafted from high-quality leather, it ensures durability, style, and '
-  'long-lasting wear, making it an essential piece in any modern wardrobe.',
-);
 
+class ProductDescription extends StatelessWidget {
+  const ProductDescription({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text(
+      'A derby leather shoe is a classic and versatile footwear option characterized by its open lacing system. '
+      'It offers a comfortable fit and a slightly more relaxed appearance than an Oxford shoe, making it suitable '
+      'for both formal and casual occasions. Crafted from high-quality leather, it ensures durability, style, and '
+      'long-lasting wear, making it an essential piece in any modern wardrobe.',
+    );
   }
 }
-class ActionButtons extends StatelessWidget{
+
+class ActionButtons extends StatelessWidget {
   const ActionButtons({super.key});
+
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Row(
-      children:[
+      children: [
         Expanded(
-          child:OutlinedButton(
-          style:OutlinedButton.styleFrom(
-            shape:RoundedRectangleBorder(
-              borderRadius: BorderRadiusGeometry.circular(4)
-            )
+          child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            onPressed: () {
+              // Implement delete logic here
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
-          onPressed: (){},
-           child:const Text('Delete',style:TextStyle(color: Colors.red)))
         ),
-        SizedBox(width:8),
+        const SizedBox(width: 8),
         Expanded(
-          child:OutlinedButton(
-          style:OutlinedButton.styleFrom(
-            shape:RoundedRectangleBorder(
-              borderRadius: BorderRadiusGeometry.circular(4)
-            )
+          child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            onPressed: () {
+              // Implement update logic here
+            },
+            child: const Text('Update', style: TextStyle(color: Colors.blue)),
           ),
-          onPressed: (){},
-           child:const Text('Update',style:TextStyle(color:Colors.blue, ))
-          )
         ),
-      ]
+      ],
     );
   }
 }

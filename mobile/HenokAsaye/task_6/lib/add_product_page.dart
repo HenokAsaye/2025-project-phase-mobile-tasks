@@ -1,13 +1,54 @@
 import 'package:flutter/material.dart';
 
-class AddProductPage extends StatelessWidget {
-  const AddProductPage({super.key});
+class ProductFormPage extends StatefulWidget {
+  const ProductFormPage({super.key});
+
+  @override
+  State<ProductFormPage> createState() => _ProductFormPageState();
+}
+
+class _ProductFormPageState extends State<ProductFormPage> {
+  final _nameController = TextEditingController();
+  final _categoryController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _descriptionController = TextEditingController();
+
+  bool isEdit = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final product = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+    if (product != null && !isEdit) {
+      _nameController.text = product['name'];
+      _categoryController.text = product['category'];
+      _priceController.text = product['price'].toString();
+      _descriptionController.text = product['description'] ?? '';
+      isEdit = true;
+    }
+  }
+
+  void _submitForm() {
+    final newProduct = {
+      'name': _nameController.text,
+      'category': _categoryController.text,
+      'price': int.tryParse(_priceController.text) ?? 0,
+      'rating': 0.0,
+      'image': 'assets/Img/shoe.jpg',
+      'description': _descriptionController.text,
+    };
+
+    Navigator.pop(context, newProduct); // Pass data back
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: const Text("Add Product"),
+        title: Text(isEdit ? "Edit Product" : "Add Product"),
         centerTitle: true,
         elevation: 0,
       ),
@@ -23,24 +64,22 @@ class AddProductPage extends StatelessWidget {
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Center(
+              child: const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Icon(Icons.image, size: 40, color: Colors.grey),
                     SizedBox(height: 8),
-                    Text(
-                      'upload image',
-                      style: TextStyle(color: Colors.grey),
-                    ),
+                    Text('Upload image', style: TextStyle(color: Colors.grey)),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            const Text("name"),
+            const Text("Name"),
             const SizedBox(height: 6),
-            TextField( 
+            TextField(
+              controller: _nameController,
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.grey[300],
@@ -48,19 +87,21 @@ class AddProductPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const Text("category"),
+            const Text("Category"),
             const SizedBox(height: 6),
             TextField(
+              controller: _categoryController,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: Colors.grey[300],
                 border: OutlineInputBorder(borderSide: BorderSide.none),
               ),
             ),
             const SizedBox(height: 16),
-            const Text("price"),
+            const Text("Price"),
             const SizedBox(height: 6),
             TextField(
+              controller: _priceController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 filled: true,
@@ -76,9 +117,10 @@ class AddProductPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const Text("description"),
+            const Text("Description"),
             const SizedBox(height: 6),
             TextField(
+              controller: _descriptionController,
               maxLines: 5,
               decoration: InputDecoration(
                 filled: true,
@@ -93,30 +135,33 @@ class AddProductPage extends StatelessWidget {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
-                  shape:RoundedRectangleBorder(
-                    borderRadius: BorderRadiusGeometry.circular(2)
-                  )
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
                 ),
-                onPressed: () {},
-                child: const Text("ADD",style:TextStyle(color:Colors.black)),
+                onPressed: _submitForm,
+                child: Text(
+                  isEdit ? "UPDATE" : "ADD",
+                  style: const TextStyle(color: Colors.black),
+                ),
               ),
             ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red),
-                  shape:RoundedRectangleBorder(
-                    borderRadius: BorderRadiusGeometry.circular(2)
-                  )
+            if (isEdit) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context, {'delete': true});
+                  },
+                  child: const Text("DELETE"),
                 ),
-                onPressed: () {},
-                child: const Text("DELETE"),
               ),
-            ),
+            ],
           ],
         ),
       ),
