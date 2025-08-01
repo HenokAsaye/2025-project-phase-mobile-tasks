@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:task_6/screens/add_product_screen.dart';
-import 'package:task_6/screens/detail_page.dart';
-import 'package:task_6/screens/search_product.dart';
-import './screens/home_screen.dart';
+import 'package:task_6/features/product/presentation/add_product_screen.dart';
+import 'package:task_6/features/product/presentation/detail_page.dart';
+import 'package:task_6/features/product/presentation/search_product.dart';
+import 'features/product/presentation/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
