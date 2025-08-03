@@ -1,44 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task_6/core/widgets/product_card.dart';
 import 'package:task_6/core/widgets/loading_widget.dart';
 import 'package:task_6/core/widgets/error_widget.dart';
-import 'package:task_6/core/widgets/empty_state_widget.dart';
 import 'package:task_6/core/constants/app_constants.dart';
+import 'package:task_6/features/product/presentation/bloc/product_bloc.dart';
+import 'package:task_6/features/product/presentation/bloc/product_event.dart';
+import 'package:task_6/features/product/presentation/bloc/product_state.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key});
-
-  final List<Map<String, dynamic>> products = [
-    {
-      "name": "Derby Leather Shoes",
-      "price": 120,
-      "image": AppConstants.defaultProductImage,
-      "category": "Men's shoe",
-      "rating": 4.0,
-    },
-    {
-      "name": "Derby Leather Shoes",
-      "price": 120,
-      "image": AppConstants.defaultProductImage,
-      "category": "Men's shoe",
-      "rating": 4.0,
-    },
-    {
-      "name": "Derby Leather Shoes",
-      "price": 120,
-      "image": AppConstants.defaultProductImage,
-      "category": "Men's shoe",
-      "rating": 4.0,
-    },
-  ];
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _isLoading = false;
-  String? _error;
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProductBloc>().add(const LoadAllProductsEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +49,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
   Widget _buildHeader() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -139,61 +120,110 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildProductList() {
-    if (_isLoading) {
-      return const Expanded(
-        child: LoadingWidget(
-          message: AppConstants.loadingProductsMessage,
-        ),
-      );
-    }
+    return BlocBuilder<ProductBloc, ProductState>(
+      builder: (context, state) {
+        if (state is LoadingState) {
+          return const Expanded(
+            child: LoadingWidget(
+              message: AppConstants.loadingProductsMessage,
+            ),
+          );
+        }
 
-    if (_error != null) {
-      return Expanded(
-        child: NetworkErrorWidget(
-          onRetry: _loadProducts,
-          customMessage: _error,
-        ),
-      );
-    }
+        if (state is ErrorState) {
+          return Expanded(
+            child: NetworkErrorWidget(
+              onRetry: () {
+                context.read<ProductBloc>().add(const LoadAllProductsEvent());
+              },
+              customMessage: state.message,
+            ),
+          );
+        }
 
-    if (widget.products.isEmpty) {
-      return Expanded(
-        child: EmptyStateWidget(
-          title: 'No Products',
-          message: AppConstants.noProductsMessage,
-          icon: Icons.inventory_2_outlined,
-          onAction: () => Navigator.pushNamed(context, AppConstants.addProductRoute),
-          actionLabel: 'Add Product',
-        ),
-      );
-    }
+        if (state is LoadedAllProductsState) {
+          if (state.products.isEmpty) {
+            return Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.inventory_2_outlined,
+                      size: 64,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No Products',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      AppConstants.noProductsMessage,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[500],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.pushNamed(context, AppConstants.addProductRoute),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Product'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
 
-    return Expanded(
-      child: ListView.builder(
-        itemCount: widget.products.length,
-        itemBuilder: (context, index) => ProductCard(
-          product: widget.products[index],
-          onTap: () => Navigator.pushNamed(
-            context,
-            AppConstants.detailRoute,
-            arguments: widget.products[index],
+          return Expanded(
+            child: ListView.builder(
+              itemCount: state.products.length,
+              itemBuilder: (context, index) {
+                final product = state.products[index];
+                final productData = {
+                  'id': product.id,
+                  'name': product.name,
+                  'price': product.price,
+                  'image': AppConstants.defaultProductImage,
+                  'category': 'Category',
+                  'rating': 4.0,
+                  'description': product.description,
+                };
+
+                return ProductCard(
+                  product: productData,
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppConstants.detailRoute,
+                    arguments: productData,
+                  ),
+                );
+              },
+            ),
+          );
+        }
+        return const Expanded(
+          child: LoadingWidget(
+            message: AppConstants.loadingProductsMessage,
           ),
-        ),
-      ),
+        );
+      },
     );
-  }
-
-  void _loadProducts() {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    // Simulate loading
-    Future.delayed(const Duration(seconds: 1), () {
-      setState(() {
-        _isLoading = false;
-      });
-    });
   }
 }
