@@ -1,12 +1,14 @@
+import 'package:dartz/dartz.dart';
 import '../entities/product.dart';
 import '../repositories/product_repository.dart';
+import '../../../../core/error/failures.dart';
 
-class ViewAllProductsUsecase {
+class ViewAllProductsUseCase {
   final ProductRepository repository;
 
-  ViewAllProductsUsecase(this.repository);
+  ViewAllProductsUseCase(this.repository);
 
-  Future<List<Product>> call(){
+  Future<Either<Failure, List<Product>>> call() {
     return repository.getAllProduct();
   }
 }
