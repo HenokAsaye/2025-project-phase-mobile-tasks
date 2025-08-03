@@ -1,7 +1,3 @@
-Absolutely — here’s a **professional, clean, and developer-friendly `README.md`** for your Ecommerce Flutter app using **TDD + Clean Architecture**:
-
----
-
 ## 🛍️ Ecommerce Flutter App
 
 A modern Flutter-based Ecommerce application built using **Clean Architecture** and **Test-Driven Development (TDD)** principles. It showcases best practices in structuring large-scale apps, writing maintainable and testable code, and integrating remote/local data sources using `http` and `shared_preferences`.
