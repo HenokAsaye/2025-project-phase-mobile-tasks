@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task_6/core/widgets/custom_text_field.dart';
 import 'package:task_6/core/widgets/custom_button.dart';
 import 'package:task_6/core/widgets/loading_widget.dart';
 import 'package:task_6/core/utils/validation_utils.dart';
 import 'package:task_6/core/constants/app_constants.dart';
+import 'package:task_6/features/product/domain/entities/product.dart';
+import 'package:task_6/features/product/presentation/bloc/product_bloc.dart';
+import 'package:task_6/features/product/presentation/bloc/product_event.dart';
+import 'package:task_6/features/product/presentation/bloc/product_state.dart';
 
 class AddProductPage extends StatefulWidget {
   final Map<String, dynamic>? product; // Accept product argument for editing
@@ -20,7 +25,6 @@ class _AddProductPageState extends State<AddProductPage> {
   late TextEditingController _priceController;
   late TextEditingController _descriptionController;
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -57,24 +61,52 @@ class _AddProductPageState extends State<AddProductPage> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: _isLoading
-          ? const LoadingWidget(message: AppConstants.savingProductMessage)
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(AppConstants.defaultPadding),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildImageUploadSection(),
-                    const SizedBox(height: 24),
-                    _buildFormFields(),
-                    const SizedBox(height: 32),
-                    _buildSubmitButton(isUpdating),
-                  ],
-                ),
+      body: BlocListener<ProductBloc, ProductState>(
+        listener: (context, state) {
+          if (state is ErrorState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
               ),
-            ),
+            );
+          } else if (state is LoadedAllProductsState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  isUpdating 
+                      ? AppConstants.productUpdatedMessage 
+                      : AppConstants.productAddedMessage,
+                ),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.pop(context);
+          }
+        },
+        child: BlocBuilder<ProductBloc, ProductState>(
+          builder: (context, state) {
+            return state is LoadingState
+                ? const LoadingWidget(message: AppConstants.savingProductMessage)
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildImageUploadSection(),
+                          const SizedBox(height: 24),
+                          _buildFormFields(),
+                          const SizedBox(height: 32),
+                          _buildSubmitButton(isUpdating),
+                        ],
+                      ),
+                    ),
+                  );
+          },
+        ),
+      ),
     );
   }
 
@@ -139,37 +171,25 @@ class _AddProductPageState extends State<AddProductPage> {
     return CustomButton(
       text: isUpdating ? "Update Product" : "Add Product",
       onPressed: _handleSubmit,
-      isLoading: _isLoading,
       icon: isUpdating ? Icons.update : Icons.add,
     );
   }
 
   void _handleSubmit() {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+      final product = Product(
+        id: widget.product?['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        name: _nameController.text,
+        description: _descriptionController.text,
+        imageUrl: AppConstants.defaultProductImage,
+        price: double.parse(_priceController.text),
+      );
 
-      // Simulate API call
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() {
-          _isLoading = false;
-        });
-        
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.product != null 
-                  ? AppConstants.productUpdatedMessage 
-                  : AppConstants.productAddedMessage,
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
-        
-        Navigator.pop(context);
-      });
+      if (widget.product != null) {
+        context.read<ProductBloc>().add(UpdateProductEvent(product: product));
+      } else {
+        context.read<ProductBloc>().add(CreateProductEvent(product: product));
+      }
     }
   }
 }
