@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:task_6/features/product/presentation/add_product_screen.dart';
 import 'package:task_6/features/product/presentation/detail_page.dart';
 import 'package:task_6/features/product/presentation/search_product.dart';
+import 'package:task_6/core/constants/app_constants.dart';
 import 'features/product/presentation/home_screen.dart';
 
 void main() {
@@ -14,15 +15,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      initialRoute: AppConstants.homeRoute,
       routes: {
-        '/': (context) => HomePage(),
-        '/search': (context) => const ProductSearchPage(),
+        AppConstants.homeRoute: (context) => HomePage(),
+        AppConstants.searchRoute: (context) => const ProductSearchPage(),
       },
       onGenerateRoute: (settings) {
-        if (settings.name == '/detail') {
+        if (settings.name == AppConstants.detailRoute) {
           final args = settings.arguments as Map<String, dynamic>;
           return PageRouteBuilder(
             pageBuilder: (_, __, ___) => DetailPage(product: args),
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
             },
           );
         }
-        if (settings.name == '/add') {
+        if (settings.name == AppConstants.addProductRoute) {
             final args = settings.arguments as Map<String, dynamic>?;
             return MaterialPageRoute(
               builder: (_) => AddProductPage(product: args),
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
       },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
     );
   }

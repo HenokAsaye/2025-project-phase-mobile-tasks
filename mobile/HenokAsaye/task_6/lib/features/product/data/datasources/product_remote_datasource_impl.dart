@@ -1,79 +1,69 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:task_6/core/error/exceptions.dart';
+import 'package:task_6/core/network/http_client_service.dart';
+import 'package:task_6/core/utils/json_utils.dart';
 import 'package:task_6/features/product/data/models/product_model.dart';
 import 'product_remote_datasource.dart';
 
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
-  final http.Client client;
+  final HttpClientService _httpClient;
 
-  ProductRemoteDataSourceImpl({required this.client});
-
-  static const baseUrl = 'https://g5-flutter-learning-path-be.onrender.com/'; 
+  ProductRemoteDataSourceImpl({required HttpClientService httpClient})
+      : _httpClient = httpClient;
 
   @override
   Future<List<ProductModel>> fetchAllProducts() async {
-    final response = await client.get(
-      Uri.parse(baseUrl),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonList = json.decode(response.body);
-      return jsonList.map((e) => ProductModel.fromJson(e)).toList();
-    } else {
+    try {
+      final response = await _httpClient.get('');
+      
+      // Handle both list and object responses
+      List<dynamic> jsonList;
+      if (response.containsKey('data')) {
+        jsonList = response['data'] as List<dynamic>;
+      } else {
+        jsonList = response.values.first as List<dynamic>;
+      }
+      
+      return JsonUtils.decodeList(jsonList, ProductModel.fromJson);
+    } catch (e) {
       throw ServerException();
     }
   }
 
   @override
   Future<ProductModel> fetchProductById(String id) async {
-    final response = await client.get(
-      Uri.parse('$baseUrl/$id'),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      return ProductModel.fromJson(json.decode(response.body));
-    } else {
+    try {
+      final response = await _httpClient.get(id);
+      return JsonUtils.decodeModel(response, ProductModel.fromJson);
+    } catch (e) {
       throw ServerException();
     }
   }
 
   @override
   Future<void> createProduct(ProductModel product) async {
-    final response = await client.post(
-      Uri.parse(baseUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(product.toJson()),
-    );
-
-    if (response.statusCode != 201) {
+    try {
+      final productJson = JsonUtils.encodeModel(product, (p) => p.toJson());
+      await _httpClient.post('', body: productJson);
+    } catch (e) {
       throw ServerException();
     }
   }
 
   @override
   Future<void> updateProduct(ProductModel product) async {
-    final response = await client.put(
-      Uri.parse('$baseUrl/${product.id}'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(product.toJson()),
-    );
-
-    if (response.statusCode != 200) {
+    try {
+      final productJson = JsonUtils.encodeModel(product, (p) => p.toJson());
+      await _httpClient.put(product.id, body: productJson);
+    } catch (e) {
       throw ServerException();
     }
   }
 
   @override
   Future<void> deleteProduct(String id) async {
-    final response = await client.delete(
-      Uri.parse('$baseUrl/$id'),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode != 200 && response.statusCode != 204) {
+    try {
+      await _httpClient.delete(id);
+    } catch (e) {
       throw ServerException();
     }
   }
