@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:task_6/core/widgets/custom_text_field.dart';
+import 'package:task_6/core/widgets/custom_button.dart';
+import 'package:task_6/core/widgets/loading_widget.dart';
+import 'package:task_6/core/utils/validation_utils.dart';
+import 'package:task_6/core/constants/app_constants.dart';
 
 class AddProductPage extends StatefulWidget {
   final Map<String, dynamic>? product; // Accept product argument for editing
@@ -14,10 +19,16 @@ class _AddProductPageState extends State<AddProductPage> {
   late TextEditingController _categoryController;
   late TextEditingController _priceController;
   late TextEditingController _descriptionController;
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
     _nameController = TextEditingController(text: widget.product?['name'] ?? '');
     _categoryController = TextEditingController(text: widget.product?['category'] ?? '');
     _priceController = TextEditingController(
@@ -46,134 +57,119 @@ class _AddProductPageState extends State<AddProductPage> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              height: 180,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
+      body: _isLoading
+          ? const LoadingWidget(message: AppConstants.savingProductMessage)
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(AppConstants.defaultPadding),
+              child: Form(
+                key: _formKey,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.image, size: 40, color: Colors.grey),
-                    SizedBox(height: 8),
-                    Text(
-                      'upload image',
-                      style: TextStyle(color: Colors.grey),
-                    ),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildImageUploadSection(),
+                    const SizedBox(height: 24),
+                    _buildFormFields(),
+                    const SizedBox(height: 32),
+                    _buildSubmitButton(isUpdating),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            const Text("Name"),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey[300],
-                border: OutlineInputBorder(borderSide: BorderSide.none),
-              ),
+    );
+  }
+
+  Widget _buildImageUploadSection() {
+    return Container(
+      width: double.infinity,
+      height: 180,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(AppConstants.defaultBorderRadius),
+        border: Border.all(color: Colors.grey.shade400, width: 2, style: BorderStyle.solid),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.image, size: 40, color: Colors.grey),
+            SizedBox(height: 8),
+            Text(
+              'Upload image',
+              style: TextStyle(color: Colors.grey),
             ),
-            const SizedBox(height: 16),
-            const Text("Category"),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _categoryController,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(borderSide: BorderSide.none),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text("Price"),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _priceController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey[300],
-                border: OutlineInputBorder(borderSide: BorderSide.none),
-                suffixIcon: const Padding(
-                  padding: EdgeInsets.all(14.0),
-                  child: Text(
-                    '\$',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text("Description"),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _descriptionController,
-              maxLines: 5,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey[300],
-                border: OutlineInputBorder(borderSide: BorderSide.none),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                onPressed: () {
-                  final productData = {
-                    'name': _nameController.text,
-                    'category': _categoryController.text,
-                    'price': double.tryParse(_priceController.text) ?? 0.0,
-                    'description': _descriptionController.text,
-                  };
-                  Navigator.pop(context, productData); // Pass back the data
-                },
-                child: Text(
-                  isUpdating ? "UPDATE" : "ADD",
-                  style: const TextStyle(color: Colors.black),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            if (isUpdating) // Only show DELETE in edit mode
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
-                    side: const BorderSide(color: Colors.red),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  onPressed: () {
-                    // Return something like {'delete': true} if needed
-                    Navigator.pop(context, {'delete': true});
-                  },
-                  child: const Text("DELETE"),
-                ),
-              ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildFormFields() {
+    return Column(
+      children: [
+        CustomTextField(
+          label: "Name",
+          controller: _nameController,
+          validator: ValidationUtils.validateProductName,
+        ),
+        const SizedBox(height: 16),
+        CustomTextField(
+          label: "Category",
+          controller: _categoryController,
+          validator: ValidationUtils.validateCategory,
+        ),
+        const SizedBox(height: 16),
+        CustomTextField(
+          label: "Price",
+          controller: _priceController,
+          keyboardType: TextInputType.number,
+          validator: ValidationUtils.validatePrice,
+        ),
+        const SizedBox(height: 16),
+        CustomTextField(
+          label: "Description",
+          controller: _descriptionController,
+          maxLines: 3,
+          validator: ValidationUtils.validateProductDescription,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubmitButton(bool isUpdating) {
+    return CustomButton(
+      text: isUpdating ? "Update Product" : "Add Product",
+      onPressed: _handleSubmit,
+      isLoading: _isLoading,
+      icon: isUpdating ? Icons.update : Icons.add,
+    );
+  }
+
+  void _handleSubmit() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Simulate API call
+      Future.delayed(const Duration(seconds: 2), () {
+        setState(() {
+          _isLoading = false;
+        });
+        
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              widget.product != null 
+                  ? AppConstants.productUpdatedMessage 
+                  : AppConstants.productAddedMessage,
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+        
+        Navigator.pop(context);
+      });
+    }
   }
 }
