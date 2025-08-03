@@ -51,7 +51,6 @@ class _ProductSearchPageState extends State<ProductSearchPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           children: [
-            // Search Field + Filter Button
             Row(
               children: [
                 Expanded(
@@ -79,16 +78,12 @@ class _ProductSearchPageState extends State<ProductSearchPage> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Product List
             Expanded(
               child: ListView.builder(
                 itemCount: products.length,
                 itemBuilder: (_, i) => productCard(products[i]),
               ),
             ),
-
-            // Filter Section (Bottom)
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerLeft,
@@ -111,7 +106,6 @@ class _ProductSearchPageState extends State<ProductSearchPage> {
                 ),
               ),
             ),
-
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerLeft,
@@ -146,7 +140,6 @@ class _ProductSearchPageState extends State<ProductSearchPage> {
                   ),
                 ),
                 onPressed: () {
-                  // Apply filter logic here
                 },
                 child: const Text("APPLY"),
               ),
@@ -167,7 +160,6 @@ class _ProductSearchPageState extends State<ProductSearchPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             child: Image.asset(
@@ -177,13 +169,11 @@ class _ProductSearchPageState extends State<ProductSearchPage> {
               fit: BoxFit.cover,
             ),
           ),
-          // Info
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Name & Price
                 Row(
                   children: [
                     Expanded(
@@ -205,8 +195,6 @@ class _ProductSearchPageState extends State<ProductSearchPage> {
                   ],
                 ),
                 const SizedBox(height: 6),
-
-                // Category & Rating
                 Row(
                   children: [
                     Text(
