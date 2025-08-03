@@ -95,8 +95,6 @@ class HttpClientService {
       throw ServerException();
     }
   }
-
-  /// Builds URI with query parameters
   Uri _buildUri(String endpoint, Map<String, dynamic>? queryParameters) {
     final uri = Uri.parse('$_baseUrl/$endpoint');
     if (queryParameters != null) {
@@ -104,8 +102,6 @@ class HttpClientService {
     }
     return uri;
   }
-
-  /// Handles HTTP response with proper error handling
   Map<String, dynamic> _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) {
@@ -114,7 +110,6 @@ class HttpClientService {
       try {
         return json.decode(response.body) as Map<String, dynamic>;
       } catch (e) {
-        // Handle case where response is a list
         final list = json.decode(response.body) as List<dynamic>;
         return {'data': list};
       }
