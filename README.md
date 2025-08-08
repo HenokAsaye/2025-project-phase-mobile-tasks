@@ -97,10 +97,4 @@ Clean Architecture enthusiast, passionate about maintainable Flutter apps.
 
 ---
 
-### 📝 License
 
-This project is licensed under the MIT License.
-
----
-
-Would you like me to tailor it to GitHub-specific formatting (like adding badges or linking folders), or generate a sample cover image for the repo as well?
