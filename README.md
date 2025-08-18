@@ -90,11 +90,5 @@ lib/
 
 ---
 
-### 🧑‍💻 Author
-
-**Henok**
-Clean Architecture enthusiast, passionate about maintainable Flutter apps.
-
----
 
 
